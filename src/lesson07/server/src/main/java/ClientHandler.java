@@ -82,7 +82,7 @@ public class ClientHandler {
 
     public void sendMessage(String message) {
         try {
-            out.writeUTF(message);// пишем сообщение клиенту
+            out.writeUTF(message);
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -92,7 +92,7 @@ public class ClientHandler {
         return nickname;
     }
 
-    public void disconnect() { // отключаемся
+    public void disconnect() {
         sendMessage("/end");
         System.out.println("disconnected " + nickname);
         server.unsubscribe(this);

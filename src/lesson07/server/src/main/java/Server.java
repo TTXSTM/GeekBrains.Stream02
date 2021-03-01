@@ -14,11 +14,11 @@ public class Server {
 
     public Server() {
         this.clients = new ArrayList<>();
-        try (ServerSocket serverSocket = new ServerSocket(8189)) {// запускаем сервер
+        try (ServerSocket serverSocket = new ServerSocket(8189)) {
             System.out.println("Server is listening on 8189");
             while (true) {
-                Socket socket = serverSocket.accept(); // ждем клиентов
-                new ClientHandler(this, socket); // после того как клиент подключился создаем для него ClientHandler
+                Socket socket = serverSocket.accept();
+                new ClientHandler(this, socket);
             }
         } catch (IOException e) {
             e.printStackTrace();
@@ -26,12 +26,12 @@ public class Server {
     }
 
     public void broadcastMessage(String message) {
-        for (ClientHandler client : clients) { // рассылаем сообщение всем подписанным клиентам
+        for (ClientHandler client : clients) {
             client.sendMessage(message);
         }
     }
 
-    public void broadcastClientsList() { // рассылаем клиентам список имен всех клиентам
+    public void broadcastClientsList() {
         StringBuilder sb = new StringBuilder(15 * clients.size());
         sb.append("/clients ");
         for (ClientHandler o : clients) {
@@ -41,18 +41,18 @@ public class Server {
         broadcastMessage(out);
     }
 
-    public void subscribe(ClientHandler client) { //добавляем подключившегося клиента в список
+    public void subscribe(ClientHandler client) {
         clients.add(client);
         broadcastClientsList();
     }
 
-    public void unsubscribe(ClientHandler client) { // удаляем клиента из списка после отключения
+    public void unsubscribe(ClientHandler client) {
         clients.remove(client);
         broadcastClientsList();
     }
 
-    public void privateMsg(ClientHandler sender, String receiverNick, String msg) { // приватное сообщение
-        if (sender.getNickname().equals(receiverNick)) { //если получатель равен отправителю
+    public void privateMsg(ClientHandler sender, String receiverNick, String msg) {
+        if (sender.getNickname().equals(receiverNick)) {
             sender.sendMessage("Note for myself: " + msg);
             return;
         }

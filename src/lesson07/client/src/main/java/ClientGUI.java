@@ -26,20 +26,17 @@ public class ClientGUI extends JFrame {
     private final JScrollPane jsClients = new JScrollPane(clientsInformation, JScrollPane.VERTICAL_SCROLLBAR_NEVER,
             JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
     private final JButton sendButton = new JButton("Send");
-    // Это чат для приватных сообщений, делаем выпадающий список чтобы
-    // можно было выбрать кому отправить сообщение
+
     private String receiver;
     private final String all = "all";
     private String[] clients = {all};
     private final JComboBox<String> selectClient = new JComboBox<>(clients);
     //при нажатии enter или кнопки submit
     private final ActionListener listener = event -> {
-        String message = textInput.getText(); // получаем введенный текст
-        // если input не пустой то отправляем сообщение
+        String message = textInput.getText();
         if (!message.isEmpty()) {
             if (receiver != null && !receiver.equalsIgnoreCase(all)) {
-                // если выбран конечный получатель, то добавляем /w и имя получателя к
-                // сообщению
+
                 message = "/w " + receiver + " " + message;
             }
             this.clientNetwork.sendMessage(message);
@@ -51,19 +48,12 @@ public class ClientGUI extends JFrame {
     private final ClientNetwork clientNetwork = new ClientNetwork();
 
 
-    // конструктор ClientGUI
     public ClientGUI() {
-        /*
-         * this.clientNetwork.setCallOnMsgRecieved(new Callback<String>() {
-         *
-         * @Override public void callback(String message){ textArea.append(message); }
-         * });
-         */
-        setCallBacks(); // имплементируем callback методы Callback-ov
-        setMainFrame(); // имплементируем основное окно
-        initilizeChatPanel(); // инициализируем панель для чата
-        initializeLoginJPanel(); // инициализируем панель для авторизации
-        this.clientNetwork.connect(); // запускаем подключение к серверу
+        setCallBacks();
+        setMainFrame();
+        initilizeChatPanel();
+        initializeLoginJPanel();
+        this.clientNetwork.connect();
         this.setVisible(true);
     }
 
@@ -75,7 +65,7 @@ public class ClientGUI extends JFrame {
         this.addWindowListener(new WindowAdapter() {
             @Override
             public void windowClosing(WindowEvent event) {
-                clientNetwork.sendMessage("/end"); // при закрытии окна отправляем серверу сообщение об отключении
+                clientNetwork.sendMessage("/end");
                 super.windowClosing(event);
             }
         });
@@ -95,8 +85,7 @@ public class ClientGUI extends JFrame {
         chatPanel.add(textInput);
         textInput.addActionListener(listener);
         sendButton.addActionListener(listener);
-        selectClient.addActionListener(e -> { //здесь мы записываем в список всех клиентов, чтобы можно было выбрать
-            // кому послать сообщение
+        selectClient.addActionListener(e -> {
             receiver = selectClient.getSelectedItem().toString();
         });
         JLabel toWho = new JLabel("to");
@@ -127,9 +116,9 @@ public class ClientGUI extends JFrame {
         buttonPanel.setBackground(Color.WHITE);
         JButton button = new JButton("Submit");
         buttonPanel.add(button);
-        button.addActionListener(e -> { // при нажатии на кнопку submit серверу запрос на авторизацию
+        button.addActionListener(e -> {
             clientNetwork.sendMessage("/auth " + login.getText() + " " + String.valueOf(password.getPassword()));
-            login.setText("");// спрашиваем данные логина и пароля
+            login.setText("");
             password.setText("");
         });
         loginPanel.add(buttonPanel);
@@ -137,24 +126,19 @@ public class ClientGUI extends JFrame {
         this.add(loginPanel);
     }
 
-    // имплиментируем нужные нам Callback-i
-    // t.e. говорим ClientNetwork, какое поведение мы ждем от него в какой ситуации
     private void setCallBacks() {
-        //при получении сообщения от сервера добавляем его в textArea
+
         this.clientNetwork.setCallOnMsgRecieved(message -> textArea.append(message + "\n"));
-        // при получении нового списка клиентов
         this.clientNetwork.setCallOnChangeClientList(clientsList -> {
-            clientsInformation.setText(clientsList);// печатаем всех клиентов в окошке клиентов
-            clients = (all + " "+ clientsList).split("\\s"); // создаем таблицу из присутствующих клиентов + варинт "все"
+            clientsInformation.setText(clientsList);
+            clients = (all + " "+ clientsList).split("\\s");
         // для combobox
-            selectClient.setModel(new DefaultComboBoxModel(clients));// передаем данные combobox
+            selectClient.setModel(new DefaultComboBoxModel(clients));
         });
-        // при успешной авторизации мы прячем loginPanel и делаем видимой chatPanel
         this.clientNetwork.setCallOnAuth(s -> {
             loginPanel.setVisible(false);
             chatPanel.setVisible(true);
         });
-        // при сообщении об ошибке показываем pop-up
         this.clientNetwork.setCallOnError(message -> JOptionPane.showMessageDialog(null, message, "We have a problem",
                 JOptionPane.ERROR_MESSAGE));
     }

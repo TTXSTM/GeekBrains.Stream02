@@ -18,34 +18,29 @@ public class ClientNetwork {
             socket = new Socket("localhost", 8189);
             in = new DataInputStream(socket.getInputStream());
             out = new DataOutputStream(socket.getOutputStream());
-            new Thread(() -> { // создаем поток для чтения
+            new Thread(() -> {
                 boolean goOn = true;
                 boolean isAuthorized = false;
                 try {
-                    while (!isAuthorized && goOn) { // цикл авторизации
-                        String message = in.readUTF(); // читаем сообщения сервера
-                        if (message.startsWith("/authok")) { // если от сервера пришло сообщение,
-                            // что авторизация прошла успешно то
-                            callOnAuth.callback("/authok"); // вызываем метод Callback-a авторизации который
-                            // имплиментирован ClientGUI
-                            isAuthorized = true; //можно выйти из цикла
-                        } else if (message.equalsIgnoreCase("/end")) { //если сервер написал end, выходим из обоих
-                            //циклов и отключаемся
+                    while (!isAuthorized && goOn) {
+                        String message = in.readUTF();
+                        if (message.startsWith("/authok")) {
+                            callOnAuth.callback("/authok");
+                            isAuthorized = true;
+                        } else if (message.equalsIgnoreCase("/end")) {
                             goOn = false;
-                        } else {// сюда мы попадаем если сервер нам написал что то умное чем authok и end
-                                // можно было бы тут написать if startsWith(error)
-                            callOnError.callback("Your login or password is wrong"); // отправляем
+                        } else {
+                            callOnError.callback("Your login or password is wrong");
                         }
                     }
-                    while (goOn) {//цикл для авторизации пользователей
-                        String msg = in.readUTF(); // читаем сообщение сервера
+                    while (goOn) {
+                        String msg = in.readUTF();
                         if (msg.equalsIgnoreCase("/end")) {
-                            goOn = false; // выходим
-                        } else if (msg.startsWith("/clients ")) { // сервер прислал список клиентов
-                            callOnChangeClientList.callback(msg.substring(9)); // отправляем список клиентов, отсекая
-                            // /clients
+                            goOn = false;
+                        } else if (msg.startsWith("/clients ")) {
+                            callOnChangeClientList.callback(msg.substring(9));
                         } else {
-                            callOnMsgRecieved.callback(msg); // при получении обычного сообщения без префиксов
+                            callOnMsgRecieved.callback(msg);
                         }
                     }
                 } catch (IOException e) {
@@ -63,7 +58,7 @@ public class ClientNetwork {
 
     public boolean sendMessage(String msg) {
         try {
-            out.writeUTF(msg); // отправляем серверу сообщение
+            out.writeUTF(msg);
             return true;
         } catch (IOException e) {
             e.printStackTrace();
@@ -72,7 +67,6 @@ public class ClientNetwork {
     }
 
     public void closeConnection() {
-        // закончили работать, все выключаем и сокеты и потоки ввода-вывода
         try {
             in.close();
 
@@ -91,7 +85,6 @@ public class ClientNetwork {
         }
     }
 
-    // сеттеры с помощью которых мы в ClientGUI можем задать желаемое поведение
 
     public void setCallOnAuth(Callback<String> callOnAuth) {
         this.callOnAuth = callOnAuth;
